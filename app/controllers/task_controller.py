@@ -1,6 +1,7 @@
 from flask import request, jsonify
 from app import db
 from app.models.task import Task
+from app.models.user import User 
 
 class TaskController:
     @staticmethod
@@ -12,7 +13,8 @@ class TaskController:
             'description': task.description,
             'status': task.status,
             'created_at': task.created_at,
-            'updated_at': task.updated_at
+            'updated_at': task.updated_at,
+            'user_id': task.user_id,
         } for task in tasks])
 
     @staticmethod
@@ -24,19 +26,30 @@ class TaskController:
             'description': task.description,
             'status': task.status,
             'created_at': task.created_at,
-            'updated_at': task.updated_at
+            'updated_at': task.updated_at,
+            'user_id': task.user_id,
         })
 
     @staticmethod
     def create_task():
         data = request.get_json()
+
+        user_id = data.get('user_id')
+
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
         new_task = Task(
             title=data['title'],
             description=data.get('description'),
-            status=data.get('status', 'pending')
+            status=data.get('status', 'pending'),
+            user_id=user_id
         )
+
         db.session.add(new_task)
         db.session.commit()
+
         return jsonify({'message': 'Task created successfully!'}), 201
 
     @staticmethod
