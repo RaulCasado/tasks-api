@@ -2,6 +2,7 @@ from flask import request, jsonify
 from werkzeug.security import generate_password_hash
 from app import db
 from app.models.user import User
+from app.models.task import Task
 
 class UserController:
     @staticmethod
@@ -51,6 +52,12 @@ class UserController:
     @staticmethod
     def delete_user(user_id):
         user = User.query.get_or_404(user_id)
+    
+        tasks = Task.query.filter_by(user_id=user_id).all()
+        if tasks:
+            return jsonify({'error': 'User cannot be deleted because they have associated tasks'}), 400
+
         db.session.delete(user)
         db.session.commit()
         return jsonify({'message': 'User deleted successfully!'})
+
