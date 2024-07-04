@@ -1,6 +1,6 @@
 import requests
 
-url = "http://localhost:5000/api/tasks"
+url = "http://localhost:5000/tasks"
 data = {
     "title": "New Task",
     "description": "This is a new task",
