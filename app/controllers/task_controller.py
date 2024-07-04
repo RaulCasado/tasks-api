@@ -1,14 +1,17 @@
 from flask import request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from app.models.task import Task
-from app.models.user import User 
+from app.models.user import User
 from app.models.tag import Tag
 from app.models.category import Category
 
 class TaskController:
     @staticmethod
+    @jwt_required()
     def get_tasks():
-        tasks = Task.query.all()
+        current_user_id = get_jwt_identity()
+        tasks = Task.query.filter_by(user_id=current_user_id).all()
         task_list = []
         for task in tasks:
             category_names = [category.name for category in task.categories]
@@ -30,10 +33,14 @@ class TaskController:
 
         return jsonify(task_list)
 
-
     @staticmethod
+    @jwt_required()
     def get_task(task_id):
+        current_user_id = get_jwt_identity()
         task = Task.query.get_or_404(task_id)
+        if task.user_id != current_user_id:
+            return jsonify({'error': 'Permission denied'}), 403
+
         category_names = [category.name for category in task.categories]
         tag_names = [tag.name for tag in task.tags]
         
@@ -52,22 +59,17 @@ class TaskController:
         
         return jsonify(task_data)
 
-
     @staticmethod
+    @jwt_required()
     def create_task():
+        current_user_id = get_jwt_identity()
         data = request.get_json()
-
-        user_id = data.get('user_id')
-
-        user = User.query.get(user_id)
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
 
         new_task = Task(
             title=data['title'],
             description=data.get('description'),
             status=data.get('status', 'pending'),
-            user_id=user_id
+            user_id=current_user_id
         )
 
         db.session.add(new_task)
@@ -76,8 +78,13 @@ class TaskController:
         return jsonify({'message': 'Task created successfully!'}), 201
 
     @staticmethod
+    @jwt_required()
     def update_task(task_id):
+        current_user_id = get_jwt_identity()
         task = Task.query.get_or_404(task_id)
+        if task.user_id != current_user_id:
+            return jsonify({'error': 'Permission denied'}), 403
+
         data = request.get_json()
         task.title = data.get('title', task.title)
         task.description = data.get('description', task.description)
@@ -86,17 +93,26 @@ class TaskController:
         return jsonify({'message': 'Task updated successfully!'})
 
     @staticmethod
+    @jwt_required()
     def delete_task(task_id):
+        current_user_id = get_jwt_identity()
         task = Task.query.get_or_404(task_id)
+        if task.user_id != current_user_id:
+            return jsonify({'error': 'Permission denied'}), 403
+
         db.session.delete(task)
         db.session.commit()
         return jsonify({'message': 'Task deleted successfully!'})
-    
-    @staticmethod
-    def remove_tag_from_task(task_id, tag_id):
-        task = Task.query.get_or_404(task_id)
-        tag = Tag.query.get_or_404(tag_id)
 
+    @staticmethod
+    @jwt_required()
+    def remove_tag_from_task(task_id, tag_id):
+        current_user_id = get_jwt_identity()
+        task = Task.query.get_or_404(task_id)
+        if task.user_id != current_user_id:
+            return jsonify({'error': 'Permission denied'}), 403
+
+        tag = Tag.query.get_or_404(tag_id)
         if tag not in task.tags:
             return jsonify({'error': 'Tag is not associated with this task'}), 404
 
@@ -106,10 +122,14 @@ class TaskController:
         return jsonify({'message': 'Tag removed from task successfully!'})
 
     @staticmethod
+    @jwt_required()
     def remove_category_from_task(task_id, category_id):
+        current_user_id = get_jwt_identity()
         task = Task.query.get_or_404(task_id)
-        category = Category.query.get_or_404(category_id)
+        if task.user_id != current_user_id:
+            return jsonify({'error': 'Permission denied'}), 403
 
+        category = Category.query.get_or_404(category_id)
         if category not in task.categories:
             return jsonify({'error': 'Category is not associated with this task'}), 404
 
