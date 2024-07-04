@@ -11,7 +11,9 @@ def create_app():
     db.init_app(app)
 
     from .routes.task_routes import task_bp
+    from .routes.user_routes import user_bp
 
-    app.register_blueprint(task_bp, url_prefix='/api')
+    app.register_blueprint(task_bp)
+    app.register_blueprint(user_bp)
 
     return app
