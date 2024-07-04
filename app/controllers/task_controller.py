@@ -65,12 +65,24 @@ class TaskController:
         current_user_id = get_jwt_identity()
         data = request.get_json()
 
+        category_ids = data.get('categories', [])
+        tag_ids = data.get('tags', [])
+
+        categories = Category.query.filter(Category.id.in_(category_ids)).all()
+        tags = Tag.query.filter(Tag.id.in_(tag_ids)).all()
+
+        if len(categories) != len(category_ids) or len(tags) != len(tag_ids):
+            return jsonify({'error': 'Invalid category or tag ID provided'}), 400
+
         new_task = Task(
             title=data['title'],
             description=data.get('description'),
             status=data.get('status', 'pending'),
             user_id=current_user_id
         )
+
+        new_task.categories.extend(categories)
+        new_task.tags.extend(tags)
 
         db.session.add(new_task)
         db.session.commit()
