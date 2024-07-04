@@ -7,20 +7,35 @@ class TaskController:
     @staticmethod
     def get_tasks():
         tasks = Task.query.all()
-        return jsonify([{
-            'id': task.id,
-            'title': task.title,
-            'description': task.description,
-            'status': task.status,
-            'created_at': task.created_at,
-            'updated_at': task.updated_at,
-            'user_id': task.user_id,
-        } for task in tasks])
+        task_list = []
+        for task in tasks:
+            category_names = [category.name for category in task.categories]
+            tag_names = [tag.name for tag in task.tags]
+            
+            task_data = {
+                'id': task.id,
+                'title': task.title,
+                'description': task.description,
+                'status': task.status,
+                'created_at': task.created_at,
+                'updated_at': task.updated_at,
+                'user_id': task.user_id,
+                'username': task.user.username,
+                'categories': category_names,
+                'tags': tag_names,
+            }
+            task_list.append(task_data)
+
+        return jsonify(task_list)
+
 
     @staticmethod
     def get_task(task_id):
         task = Task.query.get_or_404(task_id)
-        return jsonify({
+        category_names = [category.name for category in task.categories]
+        tag_names = [tag.name for tag in task.tags]
+        
+        task_data = {
             'id': task.id,
             'title': task.title,
             'description': task.description,
@@ -28,7 +43,13 @@ class TaskController:
             'created_at': task.created_at,
             'updated_at': task.updated_at,
             'user_id': task.user_id,
-        })
+            'username': task.user.username,
+            'categories': category_names,
+            'tags': tag_names,
+        }
+        
+        return jsonify(task_data)
+
 
     @staticmethod
     def create_task():
