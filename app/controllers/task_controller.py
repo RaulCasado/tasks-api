@@ -2,6 +2,8 @@ from flask import request, jsonify
 from app import db
 from app.models.task import Task
 from app.models.user import User 
+from app.models.tag import Tag
+from app.models.category import Category
 
 class TaskController:
     @staticmethod
@@ -89,3 +91,29 @@ class TaskController:
         db.session.delete(task)
         db.session.commit()
         return jsonify({'message': 'Task deleted successfully!'})
+    
+    @staticmethod
+    def remove_tag_from_task(task_id, tag_id):
+        task = Task.query.get_or_404(task_id)
+        tag = Tag.query.get_or_404(tag_id)
+
+        if tag not in task.tags:
+            return jsonify({'error': 'Tag is not associated with this task'}), 404
+
+        task.tags.remove(tag)
+        db.session.commit()
+        
+        return jsonify({'message': 'Tag removed from task successfully!'})
+
+    @staticmethod
+    def remove_category_from_task(task_id, category_id):
+        task = Task.query.get_or_404(task_id)
+        category = Category.query.get_or_404(category_id)
+
+        if category not in task.categories:
+            return jsonify({'error': 'Category is not associated with this task'}), 404
+
+        task.categories.remove(category)
+        db.session.commit()
+        
+        return jsonify({'message': 'Category removed from task successfully!'})

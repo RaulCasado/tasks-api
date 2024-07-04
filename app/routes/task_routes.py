@@ -22,3 +22,11 @@ def update_task(task_id):
 @task_bp.route('/tasks/<int:task_id>', methods=['DELETE'])
 def delete_task(task_id):
     return TaskController.delete_task(task_id)
+
+@task_bp.route('/tasks/<int:task_id>/tags/<int:tag_id>', methods=['DELETE'])
+def remove_tag_from_task(task_id, tag_id):
+    return TaskController.remove_tag_from_task(task_id, tag_id)
+
+@task_bp.route('/tasks/<int:task_id>/categories/<int:category_id>', methods=['DELETE'])
+def remove_category_from_task(task_id, category_id):
+    return TaskController.remove_category_from_task(task_id, category_id)
