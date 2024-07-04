@@ -80,3 +80,7 @@ Examples
           "title": "Updated Task",
           "status": "in_progress"
         }
+
+### Creating the database
+
+Run the initialize.py script to create the database tables and populate initial categories and tag. After running the script, visit `http://localhost:5000/initialize` in your browser or use an API client like Postman to ensure everything is set up correctly.
