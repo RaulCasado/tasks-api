@@ -4,3 +4,5 @@ Flask-SQLAlchemy
 Flask
 pymysql
 werkzeug
+Flask-JWT-Extended
+cryptography

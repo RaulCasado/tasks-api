@@ -33,14 +33,24 @@ def delete_user(user_id):
 @user_bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
+
+    existing_user = User.query.filter(
+        (User.username == data['username']) | (User.email == data['email'])
+    ).first()
+    
+    if existing_user:
+        return jsonify({'error': 'Username or email already exists'}), 400
+
     hashed_password = generate_password_hash(data['password'], method='pbkdf2:sha256')
     new_user = User(
         username=data['username'],
         email=data['email'],
         password_hash=hashed_password
     )
+
     db.session.add(new_user)
     db.session.commit()
+
     return jsonify({'message': 'User registered successfully!'}), 201
 
 @user_bp.route('/login', methods=['POST'])
@@ -50,12 +60,12 @@ def login():
     if not user or not check_password_hash(user.password_hash, data['password']):
         return jsonify({'error': 'Invalid credentials'}), 401
     
-    access_token = create_access_token(identity=user.id)
+    access_token = create_access_token(identity=str(user.id))
     return jsonify({'access_token': access_token}), 200
 
 @user_bp.route('/protected', methods=['GET'])
 @jwt_required()
 def protected():
     current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
+    user = User.query.get(int(current_user_id))
     return jsonify(logged_in_as=user.username), 200

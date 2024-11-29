@@ -16,19 +16,32 @@ Environment Setup
 2.  **Install dependencies:**  
     `pip install -r requirements.txt`
 3.  **Set up the database:**  
-    *   Create a PostgreSQL database (or another compatible engine).
+    *   Create a mySql database (or another compatible engine).
     *   Configure environment variables or the `config.py` file with database credentials.
 4.  **Configure environment variables:**  
     *   Create a `.env` file in the project root and define necessary environment variables (e.g., `DATABASE_URL`, `JWT_SECRET_KEY`, etc.).
 
+### Example of a `.env` file
+
+### Database
+MYSQL_ROOT_PASSWORD=root_password
+MYSQL_DATABASE=app_database
+MYSQL_USER=app_user
+MYSQL_PASSWORD=app_password
+
+### Flask
+HOSTNAME=db
+DATABASE=app_database
+PORT=3306
+DB_USERNAME=app_user
+PASSWORD=app_password
+
 Running the Project
 -------------------
 
-1.  **Activate the virtual environment (optional but recommended):**  
-    `source venv/bin/activate`
-2.  **Start the application:**  
-    `flask run`
-3.  The application will be available at `http://localhost:5000`.
+1.  **Start the application:**  
+    `sudo docker compose --env-file .env up --build`
+2.  The application will be available at `http://localhost:5000`.
 
 Using the API
 -------------
@@ -81,6 +94,4 @@ Examples
           "status": "in_progress"
         }
 
-### Creating the database
 
-Run the initialize.py script to create the database tables and populate initial categories and tag. After running the script, visit `http://localhost:5000/initialize` in your browser or use an API client like Postman to ensure everything is set up correctly.
